@@ -1,26 +1,20 @@
 cmake_minimum_required(VERSION 3.15)
-
-project(TextEditor
-    VERSION 1.0
-    LANGUAGES CXX
-)
+project(TextEditor VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(FetchContent)
+# Build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
 
-FetchContent_Declare(
-    sfml
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 2.5.1 
-)
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+# Find SFML
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
-
-FetchContent_MakeAvailable(sfml)
-
+# Source files
 set(FONT_SOURCES
     src/Font/FontParser.cpp
 )
@@ -28,11 +22,13 @@ set(FONT_SOURCES
 set(CORE_SOURCES
     src/Core/TextBuffer.cpp
     src/Core/Cursor.cpp
+    src/Core/Selection.cpp
 )
 
 set(RENDERING_SOURCES
     src/Rendering/GeometryUtils.cpp
     src/Rendering/GlyphRenderer.cpp
+    src/Rendering/AnalyticRenderer.cpp
     src/Rendering/TextRenderer.cpp
 )
 
@@ -44,13 +40,7 @@ set(EDITOR_SOURCES
     src/Editor/Editor.cpp
 )
 
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-
+# Create executable
 add_executable(${PROJECT_NAME}
     src/main.cpp
     ${FONT_SOURCES}
@@ -60,24 +50,34 @@ add_executable(${PROJECT_NAME}
     ${EDITOR_SOURCES}
 )
 
+# Include directories
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
+# Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
 )
 
+# Copy font file to build directory
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/fonts/jetregular.ttf 
+               ${CMAKE_CURRENT_BINARY_DIR}/fonts/jetregular.ttf COPYONLY)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/fonts)
-
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/fonts/jetregular.ttf
-    ${CMAKE_CURRENT_BINARY_DIR}/fonts/jetregular.ttf
-    COPYONLY
-)
-
-if (MSVC)
+# Compiler warnings and Sanitizers
+if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -g -O0)
+    # GCC / Clang
+    target_compile_options(${PROJECT_NAME} PRIVATE 
+        -Wall -Wextra -pedantic -g
+        -fsanitize=address        # <--- Enable ASan compilation
+        -fno-omit-frame-pointer   # <--- Better stack traces for ASan
+    )
+    
+    # You must also link against ASan
+    target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address) 
 endif()

@@ -20,8 +20,8 @@ void Editor::processEvents() {
     if (event.type == sf::Event::Closed)
       m_window.close();
     else {
-      m_inputHandler.handleEvent(event, m_textBuffer, m_cursor, m_pixelHeight,
-                                 m_bezierSteps);
+      m_inputHandler.handleEvent(event, m_textBuffer, m_cursor, m_selection,
+                                 m_pixelHeight, m_bezierSteps);
     }
   }
   m_textRenderer.setPixelHeight(m_pixelHeight);
@@ -37,7 +37,8 @@ void Editor::update() {
 
 void Editor::render() {
   m_window.clear(sf::Color::Black);
-  m_textRenderer.renderText(m_window, m_textBuffer, m_cursor);
+  m_textRenderer.renderText(m_window, m_textBuffer);
   m_textRenderer.renderCursor(m_window, m_cursor);
+  m_textRenderer.renderSelection(m_window, m_selection);
   m_window.display();
 }

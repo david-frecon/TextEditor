@@ -1,14 +1,15 @@
 #pragma once
 #include "../Core/Cursor.hh"
+#include "../Core/Selection.hh"
 #include "../Core/TextBuffer.hh"
 #include "../Font/FontParser.hh"
+#include "AnalyticRenderer.hh"
 #include "GlyphRenderer.hh"
 #include <SFML/Graphics.hpp>
 
 class TextRenderer {
 public:
   TextRenderer(Font &font);
-
   // Configuration
   void setPixelHeight(float height) { m_pixelHeight = height; }
   float getPixelHeight() const { return m_pixelHeight; }
@@ -22,14 +23,17 @@ public:
   float getLineHeight() const;
 
   // Rendering
-  void renderText(sf::RenderWindow &window, const TextBuffer &buffer,
-                  Cursor &cursor);
+  void renderText(sf::RenderWindow &window, const TextBuffer &buffer);
 
   void renderCursor(sf::RenderWindow &window, const Cursor &cursor);
+  void renderSelection(sf::RenderWindow &window, Selection &selection);
 
 private:
   Font &m_font;
   GlyphRenderer m_glyphRenderer;
+  AnalyticGlyphRenderer m_analyticRenderer;
+
+  std::vector<std::array<float, 3>> m_letterPosition;
 
   float m_pixelHeight;
   float m_lineSpacing;

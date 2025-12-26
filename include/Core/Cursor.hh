@@ -1,4 +1,5 @@
 #pragma once
+#include "TextBuffer.hh"
 #include <cstddef>
 
 class Cursor {
@@ -20,8 +21,12 @@ public:
   void toggleVisibility() { m_isVisible = !m_isVisible; }
 
   // Movement
+  void moveUp(TextBuffer &buffer);
+  void moveDown(TextBuffer &buffer);
   void moveLeft();
   void moveRight(size_t textLength);
+
+  void moveWord(std::u32string &buffer, bool toEnd);
 
 private:
   size_t m_index = 0;      // Character index in text

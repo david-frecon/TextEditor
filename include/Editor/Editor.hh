@@ -4,6 +4,7 @@
 #include "../Font/FontParser.hh"
 #include "../Input/InputHandler.hh"
 #include "../Rendering/TextRenderer.hh"
+#include "include/Core/Selection.hh"
 #include <SFML/Graphics.hpp>
 
 class Editor {
@@ -26,6 +27,7 @@ private:
   InputHandler m_inputHandler;
   TextBuffer m_textBuffer;
   Cursor m_cursor;
+  Selection m_selection;
   TextRenderer m_textRenderer;
 
   // Configuration
